@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 from random import choice, randint, shuffle
+import json
 
 
 
@@ -30,17 +31,31 @@ def saved():
     web = website_entry.get()
     mail = email_entry.get()
     password = password_entry.get()
+    new_data = {web: {
+        'email': mail,
+        'password': password,
+        }
+    }
 
     if len(web) == 0 or len(password) == 0:
         messagebox.showinfo(title='Huh, you left and empty field!', message="Please don't leave any fields empty!")
     else:
-        is_ok = messagebox.askokcancel(title=web, message=f"The are the details entered: \nEmail:{mail}\nPassword:"
-                                                          f" {password}\n"f"Are you sure you want to save?")
-        if is_ok:
-            with open('data.txt', 'a') as data_file:
-                data_file.write(f'{web} | {mail} | {password}\n')
-                website_entry.delete(0, END)
-                password_entry.delete(0, END)
+        try:
+            with open('data.json', 'r') as data_file:
+                #Reading old data
+                data = json.load(data_file)
+        except FileNotFoundError:
+            with open('data.json', 'w') as data_file:
+                json.dump(new_data, data_file, indent=4)
+        else:
+            #Updating the data
+            data.update(new_data)
+            with open('data.json', 'w') as data_file:
+                # Saving the updated data
+                json.dump(new_data, data_file, indent=4)
+        finally:
+            website_entry.delete(0, END)
+            password_entry.delete(0, END)
 
 
 # ---------------------------- UI SETUP -----------------------------#
